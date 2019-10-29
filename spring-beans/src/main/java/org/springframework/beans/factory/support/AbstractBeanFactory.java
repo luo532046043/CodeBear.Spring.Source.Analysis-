@@ -77,16 +77,16 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 /**
- * Abstract base class for {@link org.springframework.beans.factory.BeanFactory}
+ * Abstract base class for {@link BeanFactory}
  * implementations, providing the full capabilities of the
- * {@link org.springframework.beans.factory.config.ConfigurableBeanFactory} SPI.
+ * {@link ConfigurableBeanFactory} SPI.
  * Does <i>not</i> assume a listable bean factory: can therefore also be used
  * as base class for bean factory implementations which obtain bean definitions
  * from some backend resource (where bean definition access is an expensive operation).
  *
  * <p>This class provides a singleton cache (through its base class
- * {@link org.springframework.beans.factory.support.DefaultSingletonBeanRegistry},
- * singleton/prototype determination, {@link org.springframework.beans.factory.FactoryBean}
+ * {@link DefaultSingletonBeanRegistry},
+ * singleton/prototype determination, {@link FactoryBean}
  * handling, aliases, bean definition merging for child bean definitions,
  * and bean destruction ({@link org.springframework.beans.factory.DisposableBean}
  * interface, custom destroy methods). Furthermore, it can manage a bean factory
@@ -225,25 +225,28 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	/**
+	 * 返回bean的实例,该实例可能是单例bean 也有可能是原型的bean
 	 * Return an instance, which may be shared or independent, of the specified bean.
-	 * @param name the name of the bean to retrieve
-	 * @param requiredType the required type of the bean to retrieve
+	 * @param name the name of the bean to retrieve  bean的名称 也有可能是bean的别名
+	 * @param requiredType the required type of the bean to retrieve 需要获取bean的类型
 	 * @param args arguments to use when creating a bean instance using explicit arguments
 	 * (only applied when creating a new instance as opposed to retrieving an existing one)
+	 *    通过该参数传递进来,到调用构造方法时候发现有多个构造方法,我们就可以通过该参数来指定想要的构造方法了
+	 *    不需要去推断构造方法(因为推断构造方法很耗时)
 	 * @param typeCheckOnly whether the instance is obtained for a type check,
-	 * not for actual use
-	 * @return an instance of the bean
-	 * @throws BeansException if the bean could not be created
+	 * not for actual use 判断当前的bean是不是一个检查类型的bean 这类型用的很少.
+	 * @return an instance of the bean 返回一个bean实例
+	 * @throws BeansException if the bean could not be created 如果bean不能被创建 那么就回抛出异常
 	 */
 	@SuppressWarnings("unchecked")
 	protected <T> T doGetBean(final String name, @Nullable final Class<T> requiredType,
 			@Nullable final Object[] args, boolean typeCheckOnly) throws BeansException {
-
-		final String beanName = transformedBeanName(name);//拿到beanName，因为factoryBean的beanName有些特殊，所以需要进行处理
+		// 传入进来的name 可能是 别名, 也有可能是工厂bean的name,所以在这里需要转换
+		final String beanName = transformedBeanName(name);
 		Object bean;
 
 		//Eagerly check singleton cache for manually registered singletons.
-		//很重要，方法内部主要是尝试从singletonObjects拿到对象
+		//很重要，方法内部主要是尝试从singletonObjects（缓存）拿到对象
 		//这个方法也参与了解决循环依赖，用到了三个Map：singletonObjects singletonFactories earlySingletonObjects 和 一个Set：singletonsCurrentlyInCreation
 		Object sharedInstance = getSingleton(beanName);
 
@@ -894,7 +897,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Return whether this factory holds a InstantiationAwareBeanPostProcessor
 	 * that will get applied to singleton beans on shutdown.
 	 * @see #addBeanPostProcessor
-	 * @see org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor
+	 * @see InstantiationAwareBeanPostProcessor
 	 */
 	protected boolean hasInstantiationAwareBeanPostProcessors() {
 		return this.hasInstantiationAwareBeanPostProcessors;
@@ -904,7 +907,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Return whether this factory holds a DestructionAwareBeanPostProcessor
 	 * that will get applied to singleton beans on shutdown.
 	 * @see #addBeanPostProcessor
-	 * @see org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor
+	 * @see DestructionAwareBeanPostProcessor
 	 */
 	protected boolean hasDestructionAwareBeanPostProcessors() {
 		return this.hasDestructionAwareBeanPostProcessors;
@@ -1519,7 +1522,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
 	 * @return the type for the bean if determinable, or {@code null} otherwise
-	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
+	 * @see FactoryBean#getObjectType()
 	 * @see #getBean(String)
 	 */
 	@Nullable
@@ -1682,7 +1685,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param mbd the corresponding bean definition
 	 * @see org.springframework.beans.factory.DisposableBean
 	 * @see AbstractBeanDefinition#getDestroyMethodName()
-	 * @see org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor
+	 * @see DestructionAwareBeanPostProcessor
 	 */
 	protected boolean requiresDestruction(Object bean, RootBeanDefinition mbd) {
 		return (bean.getClass() != NullBean.class &&
@@ -1758,7 +1761,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * template method and the public interface method in that case.
 	 * @param beanName the name of the bean to find a definition for
 	 * @return the BeanDefinition for this prototype name (never {@code null})
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
+	 * @throws NoSuchBeanDefinitionException
 	 * if the bean definition cannot be resolved
 	 * @throws BeansException in case of errors
 	 * @see RootBeanDefinition

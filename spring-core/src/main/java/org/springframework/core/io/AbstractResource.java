@@ -48,15 +48,18 @@ public abstract class AbstractResource implements Resource {
 	 * falling back to whether an InputStream can be opened.
 	 * This will cover both directories and content resources.
 	 */
+	//判断文件是否存在，若判断过程产生异常, 就关闭对应的流
 	@Override
 	public boolean exists() {
 		// Try file existence: can we find the file in the file system?
 		try {
+			//判断文件是否存在(exists有可能抛出SecurityException异常)
 			return getFile().exists();
 		}
 		catch (IOException ex) {
 			// Fall back to stream existence: can we open the stream?
 			try {
+				//判断InputStream是否存在，存在则关闭
 				getInputStream().close();
 				return true;
 			}
@@ -69,6 +72,7 @@ public abstract class AbstractResource implements Resource {
 	/**
 	 * This implementation always returns {@code true}.
 	 */
+	//直接返回true，表示可读
 	@Override
 	public boolean isReadable() {
 		return true;
@@ -77,6 +81,7 @@ public abstract class AbstractResource implements Resource {
 	/**
 	 * This implementation always returns {@code false}.
 	 */
+	//直接返回 false，表示未被打开
 	@Override
 	public boolean isOpen() {
 		return false;
@@ -85,6 +90,7 @@ public abstract class AbstractResource implements Resource {
 	/**
 	 * This implementation always returns {@code false}.
 	 */
+	//直接返回false，表示不为 File
 	@Override
 	public boolean isFile() {
 		return false;
@@ -94,6 +100,7 @@ public abstract class AbstractResource implements Resource {
 	 * This implementation throws a FileNotFoundException, assuming
 	 * that the resource cannot be resolved to a URL.
 	 */
+	//抛出 FileNotFoundException 异常，交给子类实现
 	@Override
 	public URL getURL() throws IOException {
 		throw new FileNotFoundException(getDescription() + " cannot be resolved to URL");
@@ -103,6 +110,7 @@ public abstract class AbstractResource implements Resource {
 	 * This implementation builds a URI based on the URL returned
 	 * by {@link #getURL()}.
 	 */
+	//基于 getURL() 返回的 URL 构建 URI
 	@Override
 	public URI getURI() throws IOException {
 		URL url = getURL();
@@ -129,6 +137,7 @@ public abstract class AbstractResource implements Resource {
 	 * <p>This is the same as in {@link Resource}'s corresponding default method
 	 * but mirrored here for efficient JVM-level dispatching in a class hierarchy.
 	 */
+	//根据 getInputStream() 的返回结果构建 ReadableByteChannel
 	@Override
 	public ReadableByteChannel readableChannel() throws IOException {
 		return Channels.newChannel(getInputStream());
@@ -140,6 +149,8 @@ public abstract class AbstractResource implements Resource {
 	 * a more optimal version of this, e.g. checking a File length.
 	 * @see #getInputStream()
 	 */
+	//获取资源的长度
+	//这个资源内容长度实际就是资源的字节长度，通过全部读取一遍来判断
 	@Override
 	public long contentLength() throws IOException {
 		InputStream is = getInputStream();
@@ -166,6 +177,7 @@ public abstract class AbstractResource implements Resource {
 	 * if available.
 	 * @see #getFileForLastModifiedCheck()
 	 */
+	// 返回资源最后的修改时间
 	@Override
 	public long lastModified() throws IOException {
 		File fileToCheck = getFileForLastModifiedCheck();
