@@ -5,9 +5,9 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * @author luodong
- * @create 2019-07-02 20:41
+ * @create 2019-07-01 18:09
  **/
-@ComponentScan("com.source")
 @Configuration
+@ComponentScan("com.source")
 public class AppConfig {
 }

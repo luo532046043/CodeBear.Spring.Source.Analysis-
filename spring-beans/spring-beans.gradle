@@ -31,6 +31,3 @@ compileGroovy.dependsOn = deps - "compileJava"
 compileKotlin.dependsOn(compileGroovy)
 compileKotlin.classpath += files(compileGroovy.destinationDir)
 
-tasks.withType(GroovyCompile){
-	options.encoding = "UTF-8"
-}
